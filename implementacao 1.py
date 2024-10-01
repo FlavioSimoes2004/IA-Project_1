@@ -1,24 +1,26 @@
+from collections import defaultdict
+
 class Node:
 
-    def __init__(self, isDirty, children, parent=None):
-        self.isDirty = isDirty # if is dirty or not
-        self.children = children # list of nodes
-        self.parent = parent # parent of the node
-
-    def getIsDirty(self):
-        return self.isDirty
+    def __init__(self, num=None, parent=None):
+        self.id = None
+        self.num = None
+        self.parent = parent
     
-    def getChildren(self):
-        return self.children
+    def getId(self):
+        return self.id
+    
+    def getNum(self):
+        return self.num
     
     def getParent(self):
         return self.parent
     
-    def getChildrenByIndex(self, i):
-        return self.children[i]
-    
-    def setIsDirty(self, isDirty):
-        self.isDirty = isDirty
+    def setId(self, id):
+        self.id = id
+
+    def setNum(self, num):
+        self.num = num
 
     def setParent(self, parent):
         self.parent = parent
@@ -27,28 +29,36 @@ class Graph:
 
     def __init__(self):
         self.size = 0
-        self.list = []
+        self.list = defaultdict(list)
 
-    def add(self, node):
-        self.list.append(node)
-        self.size += 1
-        for r in node.getChildren():
-            r.setParent(node)
-            self.list.append(r)
-            self.size += 1
+    def addList(self, listNode):
+        count = 0
+        for node in listNode:
+            node.setId(self.size + count)
+            self.list[self.size].append(node)
+            count += 1
+        self.size += count
 
-    def IDDFS(self):
+    def addListWithId(self, id, listNode):
+        count = 0
+        for node in listNode:
+            node.setId(self.size + count)
+            self.list[id].append(node)
+            count += 1
+        self.size += count
+
+    def IDDFS(self, node, target, depth):
         print('ok')
 
-    def CopyAndEdit(self): #implementacao 1
+    def CopyAndEdit(self): # -------------------implementacao 1
         print('copy')
 
-    def ModParentState(self): # implementacao 2
+    def ModParentState(self): # --------------- implementacao 2
         print('edit')
         
     
 g = Graph()
-g.add(Node(True, [Node(False, None), Node(True, None)]))
+g.addList([Node()])
 
 
 print('End Point')
