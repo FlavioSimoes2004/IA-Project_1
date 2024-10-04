@@ -132,6 +132,7 @@ class Graph:
         return copy_node
 
 node = Node([[1,2,3], [4, 5, 6], [7, 8, 0]])
+desired_matrix = [[0,1,2], [3,4,5],[6,7,8]]
 g = Graph(node)
 
 print('End Point')
