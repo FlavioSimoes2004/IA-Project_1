@@ -5,7 +5,7 @@ class Node:
 
     def __init__(self, mtrx, children=None):
         self.mtrx = mtrx
-        self.children = None # its a list of nodes
+        self.children = children # its a list of nodes
 
     def getMatrix(self):
         return self.mtrx
@@ -30,6 +30,11 @@ class Node:
 
     def setChildren(self, children):
         self.children = children
+
+    def addChild(self, child):
+        if self.children == None:
+            self.children = []
+        self.children.append(child)
 
     def Compare(self, matrix):
         return np.array_equal(self.mtrx, matrix)
@@ -66,8 +71,7 @@ class Node:
 class Graph:
 
     def __init__(self, node):
-        self.list = defaultdict(list)
-        self.list[0] = [ node ]
+        self.root = node
         self.generateNodes(node)
 
     def generateNodes(self, node):
@@ -86,9 +90,8 @@ class Graph:
 
         for action in actions:
             new_node = self.CopyAndEdit(node, action)
-            if not self.checkNodes(self.list[0], new_node):
-                # add node to list
-                self.list[len(self.list)] = new_node
+            if not self.checkNodes(self.root, new_node):
+                node.addChild(new_node)
 
     def checkNodes(self, node, node_compare):
         children = node.getChildren()
@@ -105,7 +108,8 @@ class Graph:
         return False
 
     def CopyAndEdit(self, node, action):
-        copy_node = Node(node.getMatrix())
+        copy_mtrx = np.copy(node.getMatrix())
+        copy_node = Node(copy_mtrx)
         zeroPos = copy_node.zeroPos()
 
         if action == 'left':
