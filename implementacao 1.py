@@ -109,8 +109,10 @@ class Graph:
                 node.addChild(new_node)
                 new_node.setParent(node)
 
-        for child in node.getChildren():
-            self.generateNodes(child)
+        children = node.getChildren()
+        if children != None:
+            for child in children:
+                self.generateNodes(child)
 
     def checkNodes(self, node, node_compare):
         children = node.getChildren()
