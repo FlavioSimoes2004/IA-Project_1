@@ -1,64 +1,133 @@
 from collections import defaultdict
+import numpy as np
 
 class Node:
 
-    def __init__(self, num=None, parent=None):
-        self.id = None
-        self.num = None
-        self.parent = parent
-    
-    def getId(self):
-        return self.id
-    
-    def getNum(self):
-        return self.num
-    
-    def getParent(self):
-        return self.parent
-    
-    def setId(self, id):
-        self.id = id
+    def __init__(self, mtrx, children=None):
+        self.mtrx = mtrx
+        self.children = None # its a list of nodes
 
-    def setNum(self, num):
-        self.num = num
+    def getMatrix(self):
+        return self.mtrx
+    
+    def getMatrixRow(self, index):
+        return self.mtrx[index]
+    
+    def getMatrixSingleElement(self, i, j):
+        return self.mtrx[i][j]
+    
+    def getChildren(self):
+        return self.children
+    
+    def setMatrix(self, mtrx):
+        self.mtrx = mtrx
 
-    def setParent(self, parent):
-        self.parent = parent
+    def setMatrixRow(self, index, row):
+        self.mtrx[index] = row
+
+    def setMatrixSingleElement(self, i, j, value):
+        self.mtrx[i][j] = value
+
+    def setChildren(self, children):
+        self.children = children
+
+    def Compare(self, matrix):
+        return np.array_equal(self.mtrx, matrix)
+    
+    def quantActions(self):
+        action = 4
+        line = 0
+        for i in self.mtrx:
+            column = 0
+            for j in i:
+                if j == 0:
+                    if line == 0 or line == len(self.mtrx)-1:
+                        action -= 1
+                    if column == 0 or column == len(self.mtrx[line])-1:
+                        action -= 1
+                    return action
+                column += 1
+            line += 1
+        return action
+    
+    def zeroPos(self):
+        position = []
+        line = 0
+        for i in self.mtrx:
+            column = 0
+            for j in i:
+                if j == 0:
+                    position.append(line)
+                    position.append(column)
+                    return position
+                column += 1
+            line += 1
 
 class Graph:
 
-    def __init__(self):
-        self.size = 0
+    def __init__(self, node):
         self.list = defaultdict(list)
+        self.list[0] = [ node ]
+        self.generateNodes(node)
 
-    def addList(self, listNode):
-        count = 0
-        for node in listNode:
-            node.setId(self.size + count)
-            self.list[self.size].append(node)
-            count += 1
-        self.size += count
-
-    def addListWithId(self, id, listNode):
-        count = 0
-        for node in listNode:
-            node.setId(self.size + count)
-            self.list[id].append(node)
-            count += 1
-        self.size += count
-
-    def IDDFS(self, node, target, depth):
-        print('ok')
-
-    def CopyAndEdit(self): # -------------------implementacao 1
-        print('copy')
-
-    def ModParentState(self): # --------------- implementacao 2
-        print('edit')
+    def generateNodes(self, node):
+        actions = []
+        zeroPos = node.zeroPos()
         
-    
-g = Graph()
-g.addList([Node()])
+        if zeroPos[0] < len(node.getMatrix())-1:
+            actions.append('right')
+        if zeroPos[0] > 0:
+            actions.append('left')
+        
+        if zeroPos[1] < len(node.getMatrixRow(0))-1:
+            actions.append('down')
+        if zeroPos[1] > 0:
+            actions.append('up')
 
+        for action in actions:
+            new_node = self.CopyAndEdit(node, action)
+            if not self.checkNodes(self.list[0], new_node):
+                # add node to list
+                self.list[len(self.list)] = new_node
+
+    def checkNodes(self, node, node_compare):
+        children = node.getChildren()
+        if children == None:
+            return False
+        
+        else:
+            for child in children:
+                if child.Compare(node_compare):
+                    return True
+                else:
+                    self.checkNodes(child, node_compare)
+                
+        return False
+
+    def CopyAndEdit(self, node, action):
+        copy_node = Node(node.getMatrix())
+        zeroPos = copy_node.zeroPos()
+
+        if action == 'left':
+            aux = copy_node.getMatrixSingleElement(zeroPos[0], zeroPos[1]-1)
+            copy_node.setMatrixSingleElement(zeroPos[0], zeroPos[1]-1, 0)
+            copy_node.setMatrixSingleElement(zeroPos[0], zeroPos[1], aux)
+        elif action == 'right':
+            aux = copy_node.getMatrixSingleElement(zeroPos[0], zeroPos[1]+1)
+            copy_node.setMatrixSingleElement(zeroPos[0], zeroPos[1]+1, 0)
+            copy_node.setMatrixSingleElement(zeroPos[0], zeroPos[1], aux)
+        elif action == 'down':
+            aux = copy_node.getMatrixSingleElement(zeroPos[0]+1, zeroPos[1])
+            copy_node.setMatrixSingleElement(zeroPos[0]+1, zeroPos[1], 0)
+            copy_node.setMatrixSingleElement(zeroPos[0], zeroPos[1], aux)
+        else: # action == up
+            aux = copy_node.getMatrixSingleElement(zeroPos[0]-1, zeroPos[1])
+            copy_node.setMatrixSingleElement(zeroPos[0]-1, zeroPos[1], 0)
+            copy_node.setMatrixSingleElement(zeroPos[0], zeroPos[1], aux)
+
+        return copy_node
+
+node = Node([[1,2,3], [4, 5, 6], [7, 8, 0]])
+g = Graph(node)
 
 print('End Point')
