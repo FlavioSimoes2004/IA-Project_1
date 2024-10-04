@@ -3,8 +3,9 @@ import numpy as np
 
 class Node:
 
-    def __init__(self, mtrx, children=None):
+    def __init__(self, mtrx, parent=None, children=None):
         self.mtrx = mtrx
+        self.parent = parent
         self.children = children # its a list of nodes
 
     def getMatrix(self):
@@ -15,6 +16,9 @@ class Node:
     
     def getMatrixSingleElement(self, i, j):
         return self.mtrx[i][j]
+    
+    def getParent(self):
+        return self.parent
     
     def getChildren(self):
         return self.children
@@ -36,8 +40,19 @@ class Node:
             self.children = []
         self.children.append(child)
 
+    def setParent(self, parent):
+        self.parent = parent
+
     def Compare(self, matrix):
         return np.array_equal(self.mtrx, matrix)
+        #if len(self.mtrx) != len(matrix):
+        #    return False
+
+        #for i in range(len(self.mtrx)):
+        #    for j in range(len(self.mtrx[i])):
+        #        if self.mtrx[i][j] != matrix[i][j]:
+        #            return False
+        #return True
     
     def quantActions(self):
         action = 4
@@ -72,26 +87,30 @@ class Graph:
 
     def __init__(self, node):
         self.root = node
-        self.generateNodes(node)
+        self.generateNodes(self.root)
 
     def generateNodes(self, node):
         actions = []
         zeroPos = node.zeroPos()
         
         if zeroPos[0] < len(node.getMatrix())-1:
-            actions.append('right')
+            actions.append('down')
         if zeroPos[0] > 0:
-            actions.append('left')
+            actions.append('up')
         
         if zeroPos[1] < len(node.getMatrixRow(0))-1:
-            actions.append('down')
+            actions.append('right')
         if zeroPos[1] > 0:
-            actions.append('up')
+            actions.append('left')
 
         for action in actions:
             new_node = self.CopyAndEdit(node, action)
-            if not self.checkNodes(self.root, new_node):
+            if not self.checkNodes2(node, new_node):
                 node.addChild(new_node)
+                new_node.setParent(node)
+
+        for child in node.getChildren():
+            self.generateNodes(child)
 
     def checkNodes(self, node, node_compare):
         children = node.getChildren()
@@ -106,6 +125,15 @@ class Graph:
                     self.checkNodes(child, node_compare)
                 
         return False
+    
+    def checkNodes2(self, node, node_compare):
+        parent = node.getParent()
+        if node.Compare(node_compare.getMatrix()):
+            return True
+        elif parent == None:
+            return False
+        
+        return self.checkNodes2(parent, node_compare)
 
     def CopyAndEdit(self, node, action):
         copy_mtrx = np.copy(node.getMatrix())
@@ -130,9 +158,13 @@ class Graph:
             copy_node.setMatrixSingleElement(zeroPos[0], zeroPos[1], aux)
 
         return copy_node
+    
+    def DSL(self, desired_result):
+        pass
 
 node = Node([[1,2,3], [4, 5, 6], [7, 8, 0]])
 desired_matrix = [[0,1,2], [3,4,5],[6,7,8]]
 g = Graph(node)
+g.DSL(desired_matrix)
 
 print('End Point')
