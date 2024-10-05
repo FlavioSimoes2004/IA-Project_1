@@ -118,7 +118,7 @@ class Graph:
 
         return copy_node
     
-    def DSL(self, desired_result):
+    def DSL(self, goal):
         pass
 
 #sys.setrecursionlimit(2500)
