@@ -1,8 +1,6 @@
 import numpy as np
 from Node import Node
 
-from functools import lru_cache
-
 class Graph:
 
     def __init__(self, node, limit=30000):
