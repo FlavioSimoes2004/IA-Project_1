@@ -1,111 +1,21 @@
-from collections import defaultdict
 import numpy as np
+from Node import Node
 
-class Node:
-
-    def __init__(self, mtrx, parent=None, children=None):
-        self.mtrx = mtrx
-        self.parent = parent
-        self.children = children # its a list of nodes
-
-    def getMatrix(self):
-        return self.mtrx
-    
-    def getMatrixRow(self, index):
-        return self.mtrx[index]
-    
-    def getMatrixSingleElement(self, i, j):
-        return self.mtrx[i][j]
-    
-    def getParent(self):
-        return self.parent
-    
-    def getChildren(self):
-        return self.children
-    
-    def setMatrix(self, mtrx):
-        self.mtrx = mtrx
-
-    def setMatrixRow(self, index, row):
-        self.mtrx[index] = row
-
-    def setMatrixSingleElement(self, i, j, value):
-        self.mtrx[i][j] = value
-
-    def setChildren(self, children):
-        self.children = children
-
-    def addChild(self, child):
-        if self.children == None:
-            self.children = []
-        self.children.append(child)
-
-    def setParent(self, parent):
-        self.parent = parent
-
-    def Compare(self, matrix):
-        return np.array_equal(self.mtrx, matrix)
-        #if len(self.mtrx) != len(matrix):
-        #    return False
-
-        #for i in range(len(self.mtrx)):
-        #    for j in range(len(self.mtrx[i])):
-        #        if self.mtrx[i][j] != matrix[i][j]:
-        #            return False
-        #return True
-    
-    def quantActions(self):
-        action = 4
-        line = 0
-        for i in self.mtrx:
-            column = 0
-            for j in i:
-                if j == 0:
-                    if line == 0 or line == len(self.mtrx)-1:
-                        action -= 1
-                    if column == 0 or column == len(self.mtrx[line])-1:
-                        action -= 1
-                    return action
-                column += 1
-            line += 1
-        return action
-    
-    def zeroPos(self):
-        position = []
-        line = 0
-        for i in self.mtrx:
-            column = 0
-            for j in i:
-                if j == 0:
-                    position.append(line)
-                    position.append(column)
-                    return position
-                column += 1
-            line += 1
+from functools import lru_cache
 
 class Graph:
 
-    def __init__(self, node):
+    def __init__(self, node, limit=30000):
         self.root = node
-        self.generateNodes(self.root)
+        self.limit = limit # the limit of how many nodes can be created
+        self.generateNodes2()
 
-    def generateNodes(self, node):
-        actions = []
-        zeroPos = node.zeroPos()
-        
-        if zeroPos[0] < len(node.getMatrix())-1:
-            actions.append('down')
-        if zeroPos[0] > 0:
-            actions.append('up')
-        
-        if zeroPos[1] < len(node.getMatrixRow(0))-1:
-            actions.append('right')
-        if zeroPos[1] > 0:
-            actions.append('left')
+    def generateNodes(self, node): # recursive (not good because python has recursion limit)
+        actions = node.getActions()
 
         for action in actions:
             new_node = self.CopyAndEdit(node, action)
-            if not self.checkNodes2(node, new_node):
+            if not self.checkNodes(new_node):
                 node.addChild(new_node)
                 new_node.setParent(node)
 
@@ -114,32 +24,81 @@ class Graph:
             for child in children:
                 self.generateNodes(child)
 
-    def checkNodes(self, node, node_compare):
+    def generateNodes2(self): # not recursive (good)
+        list_nodes = [self.root]
+        size = 1
+        index = 0
+
+        node = list_nodes[index]
+        actions = node.getActions()
+
+        new_node = None
+
+        while(True):
+            for action in actions:
+                new_node = self.CopyAndEdit(node, action)
+                if self.checkNodes(new_node.getMatrix()) == False:
+                    node.addChild(new_node)
+                    new_node.setParent(node)
+                    list_nodes.append(new_node)
+                    size += 1
+                    print(size)
+
+            index += 1
+            if index >= size or size >= self.limit:
+                break
+            node = list_nodes[index]
+            actions = node.getActions()
+
+    def checkNodes(self, matrix_compare): # check every matrix already created and compare to the new matrix to know if it already exists
+        list_nodes = [self.root]
+        index = 0
+        node = list_nodes[index]
         children = node.getChildren()
+
+        if node.Compare(matrix_compare):
+            return True
+
+        while(True):
+            if children != None:
+                for child in children:
+                    list_nodes.append(child)
+                    if child.Compare(matrix_compare):
+                        return True
+                    
+            index += 1
+            if index >= len(list_nodes):
+                break
+            node = list_nodes[index]
+            children = node.getChildren()
+
+        return False
+
+        '''children = node.getChildren()
         if children == None:
             return False
         
         else:
             for child in children:
-                if child.Compare(node_compare):
+                if child.Compare(matrix_compare):
                     return True
                 else:
-                    self.checkNodes(child, node_compare)
+                    self.checkNodes(child, matrix_compare)
                 
-        return False
+        return False'''
     
-    def checkNodes2(self, node, node_compare):
-        parent = node.getParent()
-        if node.Compare(node_compare.getMatrix()):
-            return True
-        elif parent == None:
-            return False
-        
-        return self.checkNodes2(parent, node_compare)
+    def checkNodes2(self, node, matrix_compare): # compare only parent matrix to see if it exists
+        while(True):
+            if node == None:
+                break
+            if node.Compare(matrix_compare):
+                return True
+            node = node.getParent()
+            
+        return False
 
-    def CopyAndEdit(self, node, action):
-        copy_mtrx = np.copy(node.getMatrix())
-        copy_node = Node(copy_mtrx)
+    def CopyAndEdit(self, node, action): # copy and edits the structure of a node, make the action and then return the new node
+        copy_node = node.CopyNode()
         zeroPos = copy_node.zeroPos()
 
         if action == 'left':
@@ -164,9 +123,11 @@ class Graph:
     def DSL(self, desired_result):
         pass
 
-node = Node([[1,2,3], [4, 5, 6], [7, 8, 0]])
+#sys.setrecursionlimit(2500)
+
+node = Node([[3,1,2], [0, 4, 5], [6, 7, 8]])
 desired_matrix = [[0,1,2], [3,4,5],[6,7,8]]
-g = Graph(node)
+g = Graph(node, 1000)
 g.DSL(desired_matrix)
 
 print('End Point')
