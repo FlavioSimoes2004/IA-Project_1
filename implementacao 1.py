@@ -6,7 +6,7 @@ class Graph:
     def __init__(self, node, goal, limit=30000):
         self.root = node
         self.limit = limit # the limit of how many nodes can be created
-        self.generate_nodes_IDDFS(goal, limit)
+        self.generate_nodes_IDDFS_3(goal, limit)
 
     def getRoot(self):
         return self.root
@@ -172,10 +172,36 @@ class Graph:
                     copy.setParent(r)
                     list_node.append(copy)
         return self.generate_nodes_IDDFS_2(list_node, goal, depth + 1, maxDepth)
+    
+    def generate_nodes_IDDFS_3(self, goal, maxDepth):
+        list_node = [self.getRoot()]
+        depth = 0
+        node_list = []
+        actions = []
+
+        while True:
+            if depth >= maxDepth:
+                print('node NOT found within max depth range')
+                return None
+            print(depth)
+            node_list = []
+            for r in list_node:
+                if r.Compare(goal):
+                    print('node FOUND within max depth range')
+                    return r
+                actions = r.getActions()
+                for action in actions:
+                    copy = self.CopyAndEdit(r, action)
+                    if not self.checkNodes(copy.getMatrix()):
+                        r.addChild(copy)
+                        copy.setParent(r)
+                        node_list.append(copy)
+            list_node = np.copy(node_list)
+            depth += 1
 
 
 
-node = Node([[1, 2, 3], [4, 0, 6], [7, 8, 5]])
+node = Node([[1, 2, 0], [4, 5, 3], [7, 8, 6]])
 goal_matrix = [[1,2,3], [4,5,6],[7,8,0]]
 g = Graph(node, goal_matrix, 50)
 #g.IDDFS(goal_matrix, 50)
