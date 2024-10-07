@@ -121,27 +121,27 @@ class Graph:
 
         return copy_node
     
-    def BFS(self, goal, maxDepth):
-        stack = []
-        stack.append(self.getRoot())
+    def IDDFS(self, goal, maxDepth):
         depth = 0
-        node = None
-        children = None
+        result = self.IDDFS2(self.getRoot(), goal, depth, maxDepth)
+        if result == None:
+            print('node NOT found within max depth range')
+        else:
+            print('node FOUND within max depth range')
+        return result
 
-        while len(stack) > 0:
-            if depth > maxDepth:
-                print('COULDNT find node within depth range')
-                return False
-            
-            node = stack.pop()
-            if node.Compare(goal):
-                print('node FOUND within depth range')
-                return True
-
-            children = node.getChildren()
-            if not children == None:
-                for child in children:
-                    stack.append(child)
+    def IDDFS2(self, node, goal, depth, maxDepth):
+        if depth >= maxDepth:
+            return None
+        if node.Compare(goal):
+            return node
+        children = node.getChildren()
+        if children != None:
+            for child in children:
+                result = self.IDDFS2(child, goal, depth+1, maxDepth)
+                if result != None:
+                    return result
+        return None
             
 
 #sys.setrecursionlimit(2500)
@@ -149,6 +149,6 @@ class Graph:
 node = Node([[3,1,2], [0, 4, 5], [6, 7, 8]])
 desired_matrix = [[0,1,2], [3,4,5],[6,7,8]]
 g = Graph(node, 1000)
-g.BFS(desired_matrix, 6)
+g.IDDFS(desired_matrix, 6)
 
 print('End Point')

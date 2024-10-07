@@ -104,12 +104,12 @@ class Graph:
             node.setMatrixSingleElement(zeroPos[0]+1, zeroPos[1], 0)
             node.setMatrixSingleElement(zeroPos[0], zeroPos[1], aux)
 
-    def BFS(self, goal):
+    def IDDFS(self, goal):
         pass
 
 node = Node([[3,1,2], [0, 4, 5], [6, 7, 8]])
 desired_matrix = [[0,1,2], [3,4,5],[6,7,8]]
 g = Graph(node, 1000)
-g.BFS(desired_matrix)
+g.IDDFS(desired_matrix)
 
 print('End Point')
