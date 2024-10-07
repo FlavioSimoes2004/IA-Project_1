@@ -3,10 +3,10 @@ from Node import Node
 
 class Graph:
 
-    def __init__(self, node, limit=30000):
+    def __init__(self, node, goal, limit=30000):
         self.root = node
         self.limit = limit # the limit of how many nodes can be created
-        self.generateNodes2()
+        self.generate_nodes_IDDFS(goal, limit)
 
     def getRoot(self):
         return self.root
@@ -143,13 +143,41 @@ class Graph:
                 if result != None:
                     return result
         return None
-            
+    
+    def generate_nodes_IDDFS(self, goal, maxDepth=1000):
+        depth = 0
+        result = self.generate_nodes_IDDFS_2([self.getRoot()], goal, depth, maxDepth)
+        if result == None:
+            print('node NOT found within max depth range')
+        else:
+            print('node FOUND within max depth range')
+        return result
+    
+    def generate_nodes_IDDFS_2(self, node_list, goal, depth, maxDepth):
+        if depth >= maxDepth:
+            return None
+        
+        list_node = []
+        actions = []
+        
+        print(depth)
+        for r in node_list:
+            if r.Compare(goal):
+                return r
+            actions = r.getActions()
+            for action in actions:
+                copy = self.CopyAndEdit(r, action)
+                if not self.checkNodes(copy.getMatrix()):
+                    r.addChild(copy)
+                    copy.setParent(r)
+                    list_node.append(copy)
+        return self.generate_nodes_IDDFS_2(list_node, goal, depth + 1, maxDepth)
 
-# the algorithm will first create the nodes and then the user can search for the 
-# goal node and set the max depth to try to reach that goal
-node = Node([[1, 2, 6], [4, 8, 3], [7, 5, 0]])
+
+
+node = Node([[1, 2, 3], [4, 0, 6], [7, 8, 5]])
 goal_matrix = [[1,2,3], [4,5,6],[7,8,0]]
-g = Graph(node, 5000)
-g.IDDFS(goal_matrix, 50)
+g = Graph(node, goal_matrix, 50)
+#g.IDDFS(goal_matrix, 50)
 
 print('End Point')
