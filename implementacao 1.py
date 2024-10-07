@@ -8,6 +8,9 @@ class Graph:
         self.limit = limit # the limit of how many nodes can be created
         self.generateNodes2()
 
+    def getRoot(self):
+        return self.root
+
     def generateNodes(self, node): # recursive (not good because python has recursion limit)
         actions = node.getActions()
 
@@ -118,14 +121,34 @@ class Graph:
 
         return copy_node
     
-    def DSL(self, goal):
-        pass
+    def BFS(self, goal, maxDepth):
+        stack = []
+        stack.append(self.getRoot())
+        depth = 0
+        node = None
+        children = None
+
+        while len(stack) > 0:
+            if depth > maxDepth:
+                print('COULDNT find node within depth range')
+                return False
+            
+            node = stack.pop()
+            if node.Compare(goal):
+                print('node FOUND within depth range')
+                return True
+
+            children = node.getChildren()
+            if not children == None:
+                for child in children:
+                    stack.append(child)
+            
 
 #sys.setrecursionlimit(2500)
 
 node = Node([[3,1,2], [0, 4, 5], [6, 7, 8]])
 desired_matrix = [[0,1,2], [3,4,5],[6,7,8]]
 g = Graph(node, 1000)
-g.DSL(desired_matrix)
+g.BFS(desired_matrix, 6)
 
 print('End Point')
