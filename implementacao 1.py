@@ -121,7 +121,7 @@ class Graph:
 
         return copy_node
     
-    def IDDFS(self, goal, maxDepth):
+    def IDDFS(self, goal, maxDepth=1000):
         depth = 0
         result = self.IDDFS2(self.getRoot(), goal, depth, maxDepth)
         if result == None:
@@ -145,11 +145,11 @@ class Graph:
         return None
             
 
-#sys.setrecursionlimit(2500)
-
+# the algorithm will first create the nodes and then the user can search for the 
+# goal node and set the max depth to try to reach that goal
 node = Node([[1, 2, 6], [4, 8, 3], [7, 5, 0]])
-desired_matrix = [[1,2,3], [4,5,6],[7,8,0]]
+goal_matrix = [[1,2,3], [4,5,6],[7,8,0]]
 g = Graph(node, 5000)
-g.IDDFS(desired_matrix, 50)
+g.IDDFS(goal_matrix, 50)
 
 print('End Point')
