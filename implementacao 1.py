@@ -43,7 +43,7 @@ class Graph:
                     new_node.setParent(node)
                     list_nodes.append(new_node)
                     size += 1
-                    print(size)
+                    print(f'generated nodes: {size}')
 
             index += 1
             if index >= size or size >= self.limit:
@@ -133,6 +133,7 @@ class Graph:
     def IDDFS2(self, node, goal, depth, maxDepth):
         if depth >= maxDepth:
             return None
+        print(depth)
         if node.Compare(goal):
             return node
         children = node.getChildren()
@@ -146,9 +147,9 @@ class Graph:
 
 #sys.setrecursionlimit(2500)
 
-node = Node([[3,1,2], [0, 4, 5], [6, 7, 8]])
-desired_matrix = [[0,1,2], [3,4,5],[6,7,8]]
-g = Graph(node, 1000)
-g.IDDFS(desired_matrix, 6)
+node = Node([[1, 2, 6], [4, 8, 3], [7, 5, 0]])
+desired_matrix = [[1,2,3], [4,5,6],[7,8,0]]
+g = Graph(node, 5000)
+g.IDDFS(desired_matrix, 50)
 
 print('End Point')

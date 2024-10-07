@@ -8,6 +8,9 @@ class Graph:
         self.limit = limit
         self.generateNodes()
 
+    def getRoot(self):
+        return self.root
+
     def generateNodes(self):
         list_nodes = [self.root]
         size = 1
@@ -104,12 +107,32 @@ class Graph:
             node.setMatrixSingleElement(zeroPos[0]+1, zeroPos[1], 0)
             node.setMatrixSingleElement(zeroPos[0], zeroPos[1], aux)
 
-    def IDDFS(self, goal):
-        pass
+    def IDDFS(self, goal, maxDepth):
+        depth = 0
+        result = self.IDDFS2(self.getRoot(), goal, depth, maxDepth)
+        if result == None:
+            print('node NOT found within max depth range')
+        else:
+            print('node FOUND within max depth range')
+        return result
+
+    def IDDFS2(self, node, goal, depth, maxDepth):
+        if depth >= maxDepth:
+            return None
+        print(depth)
+        if node.Compare(goal):
+            return node
+        children = node.getChildren()
+        if children != None:
+            for child in children:
+                result = self.IDDFS2(child, goal, depth+1, maxDepth)
+                if result != None:
+                    return result
+        return None
 
 node = Node([[3,1,2], [0, 4, 5], [6, 7, 8]])
 desired_matrix = [[0,1,2], [3,4,5],[6,7,8]]
 g = Graph(node, 1000)
-g.IDDFS(desired_matrix)
+g.IDDFS(desired_matrix, 100)
 
 print('End Point')
