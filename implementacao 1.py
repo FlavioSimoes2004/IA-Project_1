@@ -247,16 +247,18 @@ class Graph:
                         node.addChild(copy)
                         copy.setParent(node)
                         result = self.generateNodesAndIDDFS_2(copy, goal, depth - 1)
-                        return result
+                        if result != None:
+                            return result
             else:
                 for index, a in enumerate(actions):
                     children = node.getChildren()
                     result = self.generateNodesAndIDDFS_2(children[index], goal, depth-1)
-                    return result
+                    if result != None:
+                        return result
             return None
 
 
-node = Node([[1, 2, 0], [4, 5, 3], [7, 8, 6]])
+node = Node([[1, 0, 2], [4, 5, 3], [6, 8, 7]])
 goal_matrix = [[1,2,3], [4,5,6],[7,8,0]]
 g = Graph(node, goal_matrix, 50)
 #g.IDDFS(goal_matrix, 50)
