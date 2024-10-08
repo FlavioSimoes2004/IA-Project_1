@@ -6,7 +6,8 @@ class Graph:
     def __init__(self, node, goal, limit=30000):
         self.root = node
         self.limit = limit # the limit of how many nodes can be created
-        self.generate_nodes_IDDFS_3(goal, limit)
+        #self.generate_nodes_IDDFS_3(goal, limit)
+        self.test(goal, limit)
 
     def getRoot(self):
         return self.root
@@ -53,24 +54,22 @@ class Graph:
 
     def checkNodes(self, matrix_compare): # check every matrix already created and compare to the new matrix to know if it already exists
         list_nodes = [self.root]
-        index = 0
-        node = list_nodes[index]
+        node = list_nodes.pop()
+        size = 0
         children = node.getChildren()
 
-        if node.Compare(matrix_compare):
-            return True
-
-        while(True):
+        while size > -1:
+            if node.Compare(matrix_compare):
+                return True
+            
             if children != None:
                 for child in children:
                     list_nodes.append(child)
-                    if child.Compare(matrix_compare):
-                        return True
-                    
-            index += 1
-            if index >= len(list_nodes):
-                break
-            node = list_nodes[index]
+                    size += 1
+                    #if child.Compare(matrix_compare):
+                    #    return True
+            node = list_nodes.pop()
+            size -= 1
             children = node.getChildren()
 
         return False
@@ -87,6 +86,25 @@ class Graph:
                     self.checkNodes(child, matrix_compare)
                 
         return False'''
+
+    def checkNodes3(self, matrix_compare):
+        list_nodes = [[self.root]]
+        nodes = list_nodes.pop()
+        size = 0
+
+        if nodes[0].getChildren() != None:
+            list_nodes.append(nodes[0].getChildren())
+
+        while size > 0:
+            for node in nodes:
+                if node.Compare(matrix_compare):
+                    return True
+                elif node.getChildren() != None:
+                    list_nodes.append(node.getChildren())
+                    size += 1
+            nodes = list_nodes.pop()
+            size -= 1
+        return False
     
     def checkNodes2(self, node, matrix_compare): # compare only parent matrix to see if it exists
         while(True):
@@ -178,12 +196,13 @@ class Graph:
         depth = 0
         node_list = []
         actions = []
+        count = 1
 
         while True:
-            if depth >= maxDepth:
+            if depth > maxDepth:
                 print('node NOT found within max depth range')
                 return None
-            print(depth)
+            
             node_list = []
             for r in list_node:
                 if r.Compare(goal):
@@ -192,16 +211,54 @@ class Graph:
                 actions = r.getActions()
                 for action in actions:
                     copy = self.CopyAndEdit(r, action)
-                    if not self.checkNodes(copy.getMatrix()):
+                    if self.checkNodes3(copy.getMatrix()) == False:
                         r.addChild(copy)
                         copy.setParent(r)
                         node_list.append(copy)
+                        count += 1
             list_node = np.copy(node_list)
+            print(f'Nodes criados: {count}\n Depth: {depth}')
             depth += 1
 
+    def generateNodeAndIDDFS(self, goal, maxDepth):
+        depth = 0
+        while True:
+            print(depth)
+            result = self.test2(self.getRoot(), goal, depth)
+            if result != None:
+                print('found')
+                return result
+            elif depth > maxDepth:
+                print('NOT found')
+                return None
+            depth += 1
+
+    def generateNodesAndIDDFS_2(self, node, goal, depth):
+        if node.Compare(goal):
+            return node
+        elif depth <= 0:
+            return None
+        else:
+            actions = node.getActions()
+            if node.getChildren() == None:
+                for a in actions:
+                    copy = self.CopyAndEdit(node, a)
+                    if self.checkNodes3(copy.getMatrix()) == False:
+                        node.addChild(copy)
+                        copy.setParent(node)
+                        result = self.test2(copy, goal, depth - 1)
+                        if result != None:
+                            return result
+            else:
+                for index, a in enumerate(actions):
+                    children = node.getChildren()
+                    result = self.test2(children[index], goal, depth-1)
+                    if result != None:
+                        return result
+            return None
 
 
-node = Node([[1, 2, 0], [4, 5, 3], [7, 8, 6]])
+node = Node([[1, 0, 3], [4, 5, 2], [7, 8, 6]])
 goal_matrix = [[1,2,3], [4,5,6],[7,8,0]]
 g = Graph(node, goal_matrix, 50)
 #g.IDDFS(goal_matrix, 50)
