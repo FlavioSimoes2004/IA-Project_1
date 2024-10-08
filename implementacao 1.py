@@ -7,7 +7,7 @@ class Graph:
         self.root = node
         self.limit = limit # the limit of how many nodes can be created
         #self.generate_nodes_IDDFS_3(goal, limit)
-        self.test(goal, limit)
+        self.generateNodeAndIDDFS(goal, limit)
 
     def getRoot(self):
         return self.root
@@ -224,7 +224,7 @@ class Graph:
         depth = 0
         while True:
             print(depth)
-            result = self.test2(self.getRoot(), goal, depth)
+            result = self.generateNodesAndIDDFS_2(self.getRoot(), goal, depth)
             if result != None:
                 print('found')
                 return result
@@ -246,19 +246,17 @@ class Graph:
                     if self.checkNodes3(copy.getMatrix()) == False:
                         node.addChild(copy)
                         copy.setParent(node)
-                        result = self.test2(copy, goal, depth - 1)
-                        if result != None:
-                            return result
+                        result = self.generateNodesAndIDDFS_2(copy, goal, depth - 1)
+                        return result
             else:
                 for index, a in enumerate(actions):
                     children = node.getChildren()
-                    result = self.test2(children[index], goal, depth-1)
-                    if result != None:
-                        return result
+                    result = self.generateNodesAndIDDFS_2(children[index], goal, depth-1)
+                    return result
             return None
 
 
-node = Node([[1, 0, 3], [4, 5, 2], [7, 8, 6]])
+node = Node([[1, 2, 0], [4, 5, 3], [7, 8, 6]])
 goal_matrix = [[1,2,3], [4,5,6],[7,8,0]]
 g = Graph(node, goal_matrix, 50)
 #g.IDDFS(goal_matrix, 50)
